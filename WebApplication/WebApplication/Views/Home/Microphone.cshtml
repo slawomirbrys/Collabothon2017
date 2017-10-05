@@ -6,7 +6,7 @@
         <td></td>
         <td>
             <h1 style="font-weight:500;">Speech Recognition</h1>
-            <h2 style="font-weight:500; font-size: 60pt" id="hypothesisDiv"></h2>
+            <h2 style="font-weight:500; font-size: 60pt" id="phraseDiv"></h2>
         </td>
     </tr>
 </table>
@@ -77,7 +77,7 @@
                     //console.log(JSON.stringify(event.Result)); // check console for other information in result
                     break;
                 case "SpeechSimplePhraseEvent":
-                    UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
+                    UpdateRecognizedPhrase(event.Result.DisplayText);
                     console.log('Recognized text: ', event.Result.DisplayText);
                     DoSpeak(event.Result.DisplayText);
                     break;
@@ -108,7 +108,7 @@
 
     function DoSpeak(text) {
         if (text) {
-            bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enGB_Female, () => {
+            bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enAU_Female, () => {
                 RecognizerStart(SDK, recognizer);
             });
         }
@@ -130,8 +130,8 @@
         createBtn = document.getElementById("createBtn");
         //startBtn = document.getElementById("startBtn");
         //stopBtn = document.getElementById("stopBtn");
-        //phraseDiv = document.getElementById("phraseDiv");
-        hypothesisDiv = document.getElementById("hypothesisDiv");
+        phraseDiv = document.getElementById("phraseDiv");
+        //hypothesisDiv = document.getElementById("hypothesisDiv");
         statusDiv = document.getElementById("statusDiv");
         console.log('key is', '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]')
         key = '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]'; //document.getElementById("key");
@@ -183,15 +183,20 @@
     }
 
     function UpdateRecognizedHypothesis(text) {
-        hypothesisDiv.innerHTML = text;
+        //hypothesisDiv.innerHTML = text;
     }
 
     function OnSpeechEndDetected() {
         //stopBtn.disabled = true;
     }
 
-    function UpdateRecognizedPhrase(json) {
-        //phraseDiv.innerHTML = json;
+    function UpdateRecognizedPhrase(text) {
+        if (text) {
+            phraseDiv.innerHTML = text;
+        }
+        else {
+            phraseDiv.innerHTML = '';
+        }
     }
 
     function OnComplete() {
