@@ -16,6 +16,8 @@
 
 <!-- SDK REFERENCE -->
 <script src="~/scripts/speech.browser.sdk.js"></script>
+<script src="~/scripts/BingTTSClient.js"></script>
+<script src="~/scripts/BingSpeech.js"></script>
 
 <!-- SDK USAGE -->
 <script>
@@ -77,6 +79,7 @@
                 case "SpeechSimplePhraseEvent":
                     UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
                     console.log('Recognized text: ', event.Result.DisplayText);
+                    DoSpeak(event.Result.DisplayText);
                     break;
                 case "SpeechDetailedPhraseEvent":
                     UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
@@ -84,7 +87,7 @@
                 case "RecognitionEndedEvent":
                     //OnComplete();
                     //UpdateStatus("Idle");
-                    RecognizerStart(SDK, recognizer);
+                    //RecognizerStart(SDK, recognizer);
                     //console.log(JSON.stringify(event)); // Debug information
                     break;
             }
@@ -102,6 +105,17 @@
         // recognizer.AudioSource.Detach(audioNodeId) can be also used here. (audioNodeId is part of ListeningStartedEvent)
         recognizer.AudioSource.TurnOff();
     }
+
+    function DoSpeak(text) {
+        if (text) {
+            bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enGB_Female, () => {
+                RecognizerStart(SDK, recognizer);
+            });
+        }
+        else {
+            RecognizerStart(SDK, recognizer);
+        }
+    }
 </script>
 
 <!-- Browser Hooks -->
@@ -110,6 +124,7 @@
     var SDK;
     var recognizer;
     var previousSubscriptionKey;
+    var bingClientTTS;
 
     document.addEventListener("DOMContentLoaded", function () {
         createBtn = document.getElementById("createBtn");
@@ -122,7 +137,10 @@
         key = 'f6c56b9daf6e4386822fee7ae22e237d'; //document.getElementById("key");
         languageOptions = 'en-US'; //document.getElementById("languageOptions");
         formatOptions = 'Simple'; //document.getElementById("formatOptions");
-
+        bingClientTTS = new BingTTS.Client(key);
+        //bingClientTTS.synthesize("Hello my dear", BingTTS.SupportedLocales.enGB_Female, () => {
+        //}); 
+        
         //languageOptions.addEventListener("change", function () {
         //    Setup();
         //});
