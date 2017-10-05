@@ -134,13 +134,13 @@
         hypothesisDiv = document.getElementById("hypothesisDiv");
         statusDiv = document.getElementById("statusDiv");
         console.log('key is', '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"];')
-        key = 'f6c56b9daf6e4386822fee7ae22e237d'; //document.getElementById("key");
+        key = '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"];'; //document.getElementById("key");
         languageOptions = 'en-US'; //document.getElementById("languageOptions");
         formatOptions = 'Simple'; //document.getElementById("formatOptions");
         bingClientTTS = new BingTTS.Client(key);
         //bingClientTTS.synthesize("Hello my dear", BingTTS.SupportedLocales.enGB_Female, () => {
-        //}); 
-        
+        //});
+
         //languageOptions.addEventListener("change", function () {
         //    Setup();
         //});
@@ -151,7 +151,7 @@
             RecognizerStart(SDK, recognizer);
             //startBtn.disabled = false;
         });
-        
+
         //startBtn.addEventListener("click", function () {
         //    if (!recognizer || previousSubscriptionKey != key.value) {
         //        previousSubscriptionKey = key.value;
@@ -171,7 +171,7 @@
         //    stopBtn.disabled = true;
         //});
 
-       
+
     });
 
     function Setup() {
