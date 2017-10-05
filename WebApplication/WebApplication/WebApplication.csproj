@@ -161,6 +161,9 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\mic-demo-arrow.svg" />
+    <Content Include="Content\mic-demo-icons.svg" />
+    <Content Include="Content\microphone.css" />
     <Content Include="Content\minion_nokeyframerig_old-pc.gif" />
     <Content Include="Content\minion_presenting.gif" />
     <Content Include="Content\minion_work.gif" />
@@ -173,7 +176,10 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\Collabothon2017 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\mbotteam - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\microphone.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -182,8 +188,11 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\recorder.js" />
+    <Content Include="Scripts\recorderworker.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\speech.browser.sdk.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -198,6 +207,7 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\Microphone.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
