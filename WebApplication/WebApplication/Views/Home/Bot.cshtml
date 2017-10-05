@@ -1,0 +1,40 @@
+﻿<h1>Bot Service</h1>
+
+<br />
+<script src="http://unpkg.com/botframework-directlinejs/directLine.js"></script>
+
+<script>
+    var key = '5vjTfzrtue0.cwA.7ME.PGaXUHdjCIpXtrW_SmLP1UuWQEISSbwjCfSP7Gw0JnY';
+    console.log('Secret key:', key);
+    var userId = '1';
+    var userName = 'web';
+
+    var directLine = new DirectLine.DirectLine({
+        secret: key//,
+        //token: /* or put your Direct Line token here (supply secret OR token, not both) */,
+        //domain: /* optional: if you are not using the default Direct Line endpoint, e.g. if you are using a region-specific endpoint, put its full URL here */
+        //webSocket: /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
+        //pollingInterval: /* optional: set polling interval in milliseconds. Default to 1000 */,
+    });
+    console.log('starting');
+
+    directLine.postActivity({
+        from: { id: userId, name: userName }, // required (from.name is optional)
+        type: 'message',
+        text: 'accept all'
+    }).subscribe(
+        id => {
+            console.log("Posted activity, assigned ID ", id);
+
+            directLine.activity$
+                .filter(activity => activity.type === 'message' && activity.from.id !== userId)
+                .subscribe(
+                message => {
+                    console.log("received message ", message.text);
+                });
+        },
+        error => console.log("Error posting activity", error)
+        );
+
+
+</script>

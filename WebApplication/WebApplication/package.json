@@ -1,0 +1,19 @@
+{
+  "name": "mBotClient",
+  "version": "1.0.0",
+  "description": "Bot Service Client",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "mBot Team",
+  "license": "MIT",
+  "keywords": [
+    "botbuilder",
+    "bots",
+    "chatbots",
+    "botbuilder-samples"
+  ],
+  "dependencies": {
+
+  }
+}

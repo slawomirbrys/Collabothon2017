@@ -10,6 +10,7 @@
         </td>
     </tr>
 </table>
+<script src="http://unpkg.com/botframework-directlinejs/directLine.js"></script>
 
 <!-- The SDK has a dependency on requirejs (http://requirejs.org/). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
@@ -79,7 +80,8 @@
                 case "SpeechSimplePhraseEvent":
                     UpdateRecognizedPhrase(event.Result.DisplayText);
                     console.log('Recognized text: ', event.Result.DisplayText);
-                    DoSpeak(event.Result.DisplayText);
+                    //DoSpeak(event.Result.DisplayText);
+                    TalkToBot(event.Result.DisplayText);
                     break;
                 case "SpeechDetailedPhraseEvent":
                     UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
@@ -116,6 +118,9 @@
             RecognizerStart(SDK, recognizer);
         }
     }
+
+   
+
 </script>
 
 <!-- Browser Hooks -->
@@ -125,6 +130,10 @@
     var recognizer;
     var previousSubscriptionKey;
     var bingClientTTS;
+    var botKey;
+    var botDirectLine;
+    var userId = "1";
+    var userName = "web";
 
     document.addEventListener("DOMContentLoaded", function () {
         createBtn = document.getElementById("createBtn");
@@ -135,6 +144,8 @@
         statusDiv = document.getElementById("statusDiv");
         console.log('key is', '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]')
         key = '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]'; //document.getElementById("key");
+        botKey = '@System.Configuration.ConfigurationManager.AppSettings["BotKey"]';
+
         languageOptions = 'en-US'; //document.getElementById("languageOptions");
         formatOptions = 'Simple'; //document.getElementById("formatOptions");
         bingClientTTS = new BingTTS.Client(key);
@@ -147,6 +158,14 @@
 
         Initialize(function (speechSdk) {
             SDK = speechSdk;
+            botDirectLine = new DirectLine.DirectLine({
+                secret: botKey,
+                //token: /* or put your Direct Line token here (supply secret OR token, not both) */,
+                //domain: /* optional: if you are not using the default Direct Line endpoint, e.g. if you are using a region-specific endpoint, put its full URL here */
+                //webSocket: /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
+                //pollingInterval: /* optional: set polling interval in milliseconds. Default to 1000 */,
+            });
+
             Setup();
             RecognizerStart(SDK, recognizer);
             //startBtn.disabled = false;
@@ -202,5 +221,30 @@
     function OnComplete() {
         //startBtn.disabled = false;
         //stopBtn.disabled = true;
+    }
+
+    function TalkToBot(text) {
+        if (text) {
+            botDirectLine.postActivity({
+                from: { id: userId, name: userName }, // required (from.name is optional)
+                type: 'message',
+                text: text
+            }).subscribe(
+                id => {
+                    console.log("Posted activity, assigned ID ", id);
+
+                    botDirectLine.activity$
+                        .filter(activity => activity.type === 'message' && activity.from.id !== userId)
+                        .subscribe(
+                        message => {
+                            console.log("received message ", message.text);
+                            DoSpeak(message.text);
+                        });
+                },
+                error => console.log("Error posting activity", error));
+        }
+        else {
+            RecognizerStart(SDK, recognizer);
+        }
     }
 </script>
