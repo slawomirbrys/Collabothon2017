@@ -1,12 +1,39 @@
 ﻿
+@{ 
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
 
-
-<table width="100%">
+<table style="width: 600px">
     <tr>
-        <td></td>
         <td>
-            <h1 style="font-weight:500;">Speech Recognition</h1>
-            <h2 style="font-weight:500; font-size: 60pt" id="phraseDiv"></h2>
+            <h1 style="font-weight:500;">Account Manager</h1>
+        </td>
+        <td>
+            <i class="fa fa-assistive-listening-systems" 
+               id="icon1"
+               aria-hidden="true" 
+               style="font-size: 50pt; color: limegreen; display: none"></i>
+            <i class="fa fa-cogs" 
+               id="icon2"
+               aria-hidden="true" 
+               style="font-size: 50pt; color: gray; display: none"></i>
+            <i class="fa fa-commenting" 
+               id="icon3"
+               aria-hidden="true" 
+               style="font-size: 50pt; color: orangered; display: none"></i>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <h2 style="font-weight:500; font-size: 60pt" id="phraseDiv">To jest tekst</h2>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" id="history">
+            <h3>to jest to</h3>
+            <h3 style="text-align: right">to jest tamto</h3>
         </td>
     </tr>
 </table>
@@ -63,9 +90,11 @@
                     break;
                 case "RecognitionStartedEvent":
                     UpdateStatus("Listening_Recognizing");
+                    showIcon(1);
                     break;
                 case "SpeechStartDetectedEvent":
                     UpdateStatus("Listening_DetectedSpeech_Recognizing");
+                    showIcon(1);
                     //console.log(JSON.stringify(event.Result)); // check console for other information in result
                     break;
                 case "SpeechHypothesisEvent":
@@ -108,19 +137,7 @@
         recognizer.AudioSource.TurnOff();
     }
 
-    function DoSpeak(text) {
-        if (text) {
-            bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enAU_Female, () => {
-                RecognizerStart(SDK, recognizer);
-            });
-        }
-        else {
-            RecognizerStart(SDK, recognizer);
-        }
-    }
-
-   
-
+    
 </script>
 
 <!-- Browser Hooks -->
@@ -134,6 +151,9 @@
     var botDirectLine;
     var userId = "1";
     var userName = "web";
+    var icon1 = $('#icon1');
+    var icon2 = $('#icon2');
+    var icon3 = $('#icon3');
 
     document.addEventListener("DOMContentLoaded", function () {
         createBtn = document.getElementById("createBtn");
@@ -142,9 +162,10 @@
         phraseDiv = document.getElementById("phraseDiv");
         //hypothesisDiv = document.getElementById("hypothesisDiv");
         statusDiv = document.getElementById("statusDiv");
-        console.log('key is', '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]')
-        key = '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]'; //document.getElementById("key");
+        key = '@System.Configuration.ConfigurationManager.AppSettings["SpeechKey"]';
         botKey = '@System.Configuration.ConfigurationManager.AppSettings["BotKey"]';
+        console.log('speechKey: ', key);
+        console.log('botKey:', botKey);
 
         languageOptions = 'en-US'; //document.getElementById("languageOptions");
         formatOptions = 'Simple'; //document.getElementById("formatOptions");
@@ -162,8 +183,8 @@
                 secret: botKey,
                 //token: /* or put your Direct Line token here (supply secret OR token, not both) */,
                 //domain: /* optional: if you are not using the default Direct Line endpoint, e.g. if you are using a region-specific endpoint, put its full URL here */
-                //webSocket: /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
-                //pollingInterval: /* optional: set polling interval in milliseconds. Default to 1000 */,
+                webSocket: false /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
+                pollingInterval: 250 /* optional: set polling interval in milliseconds. Default to 1000 */,
             });
 
             Setup();
@@ -199,6 +220,7 @@
 
     function UpdateStatus(status) {
         //statusDiv.innerHTML = status;
+        console.log(status);
     }
 
     function UpdateRecognizedHypothesis(text) {
@@ -225,6 +247,7 @@
 
     function TalkToBot(text) {
         if (text) {
+            showIcon(2);
             botDirectLine.postActivity({
                 from: { id: userId, name: userName }, // required (from.name is optional)
                 type: 'message',
@@ -244,7 +267,30 @@
                 error => console.log("Error posting activity", error));
         }
         else {
+            showIcon(1);
             RecognizerStart(SDK, recognizer);
         }
     }
+
+    function DoSpeak(text) {
+        if (text) {
+            showIcon(3);
+            bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enAU_Female, () => {
+                RecognizerStart(SDK, recognizer);
+            });
+        }
+        else {
+            showIcon(1);
+            RecognizerStart(SDK, recognizer);
+        }
+    }
+
+    function showIcon(number) {
+        console.log('showIcon', number);
+        $('#icon1').hide();
+        $('#icon2').hide();
+        $('#icon3').hide();
+        $(`#icon${number}`).show();
+    }
+
 </script>
