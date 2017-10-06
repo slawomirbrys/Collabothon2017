@@ -27,13 +27,11 @@
     </tr>
     <tr>
         <td colspan="2">
-            <h2 style="font-weight:500; font-size: 60pt" id="phraseDiv">To jest tekst</h2>
+            <h2 style="font-weight:500; font-size: 60pt; background-color: #eeeeee" id="phraseDiv"></h2>
         </td>
     </tr>
     <tr>
         <td colspan="2" id="history">
-            <h3>to jest to</h3>
-            <h3 style="text-align: right">to jest tamto</h3>
         </td>
     </tr>
 </table>
@@ -220,7 +218,7 @@
 
     function UpdateStatus(status) {
         //statusDiv.innerHTML = status;
-        console.log(status);
+        //console.log(status);
     }
 
     function UpdateRecognizedHypothesis(text) {
@@ -236,7 +234,7 @@
             phraseDiv.innerHTML = text;
         }
         else {
-            phraseDiv.innerHTML = '';
+            phraseDiv.innerHTML = '&nbsp';
         }
     }
 
@@ -260,6 +258,7 @@
                         .filter(activity => activity.type === 'message' && activity.from.id !== userId)
                         .subscribe(
                         message => {
+                            MoveToHistory(text, false);
                             console.log("received message ", message.text);
                             DoSpeak(message.text);
                         });
@@ -272,11 +271,19 @@
         }
     }
 
+    function MoveToHistory(text, isBot) {
+        $('#history').prepend(`<h2 ${isBot ? 'style="text-align: right"' : ''}>${text}</h2>`);
+        UpdateRecognizedPhrase('');
+    }
+
     function DoSpeak(text) {
+        UpdateRecognizedPhrase('');
         if (text) {
             showIcon(3);
+            phraseDiv.innerHTML = text;
             bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enAU_Female, () => {
                 RecognizerStart(SDK, recognizer);
+                MoveToHistory(text, true);
             });
         }
         else {
@@ -286,7 +293,7 @@
     }
 
     function showIcon(number) {
-        console.log('showIcon', number);
+        //console.log('showIcon', number);
         $('#icon1').hide();
         $('#icon2').hide();
         $('#icon3').hide();
