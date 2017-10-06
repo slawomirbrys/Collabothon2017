@@ -27,7 +27,7 @@
     </tr>
     <tr>
         <td colspan="2">
-            <h2 style="font-weight:500; font-size: 60pt; background-color: #eeeeee" id="phraseDiv"></h2>
+            <h2 style="font-weight:500; font-size: 40pt; background-color: #eeeeee" id="phraseDiv">&nbsp;</h2>
         </td>
     </tr>
     <tr>
@@ -181,8 +181,8 @@
                 secret: botKey,
                 //token: /* or put your Direct Line token here (supply secret OR token, not both) */,
                 //domain: /* optional: if you are not using the default Direct Line endpoint, e.g. if you are using a region-specific endpoint, put its full URL here */
-                webSocket: false /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
-                pollingInterval: 250 /* optional: set polling interval in milliseconds. Default to 1000 */,
+                //webSocket: false /* optional: false if you want to use polling GET to receive messages. Defaults to true (use WebSocket). */,
+                //pollingInterval: 250 /* optional: set polling interval in milliseconds. Default to 1000 */,
             });
 
             Setup();
@@ -244,6 +244,7 @@
     }
 
     function TalkToBot(text) {
+        var localText = text;
         if (text) {
             showIcon(2);
             botDirectLine.postActivity({
@@ -253,15 +254,20 @@
             }).subscribe(
                 id => {
                     console.log("Posted activity, assigned ID ", id);
-
-                    botDirectLine.activity$
-                        .filter(activity => activity.type === 'message' && activity.from.id !== userId)
-                        .subscribe(
-                        message => {
-                            MoveToHistory(text, false);
-                            console.log("received message ", message.text);
-                            DoSpeak(message.text);
-                        });
+                    if (id === 'retry') {
+                        console.log('handling "please repeat"');
+                        DoSpeak('Please repeat');
+                    }
+                    else {
+                        botDirectLine.activity$
+                            .filter(activity => activity.type === 'message' && activity.from.id !== userId)
+                            .subscribe(
+                            message => {
+                                MoveToHistory(localText, false);
+                                console.log("received message ", message.text);
+                                DoSpeak(message.text);
+                            });
+                    }
                 },
                 error => console.log("Error posting activity", error));
         }
@@ -272,12 +278,22 @@
     }
 
     function MoveToHistory(text, isBot) {
-        $('#history').prepend(`<h2 ${isBot ? 'style="text-align: right"' : ''}>${text}</h2>`);
-        UpdateRecognizedPhrase('');
+        var h = '<h2 style="color: ';
+        if (isBot) {
+            h += 'coral; text-align: right';
+        }
+        else {
+            h += 'cornflowerblue';
+        }
+        h += ';">';
+        h += text;
+        h += "</h2>";
+        $('#history').prepend(h);
+        UpdateRecognizedPhrase();
     }
 
     function DoSpeak(text) {
-        UpdateRecognizedPhrase('');
+        UpdateRecognizedPhrase();
         if (text) {
             showIcon(3);
             phraseDiv.innerHTML = text;
