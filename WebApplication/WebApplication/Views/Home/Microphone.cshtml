@@ -76,8 +76,13 @@
         return SDK.CreateRecognizer(recognizerConfig, authentication);
     }
 
+    var recognizing = false;
     // Start the recognition
     function RecognizerStart(SDK, recognizer) {
+        if (recognizing) {
+            console.log('>>> OMMITTED DOUBLED RECOGNIZER');
+            return;
+        }
         console.log('--> START RECOGNITION');
         console.log('recognizer', recognizer);
         recognizer.Recognize((event) => {
@@ -162,10 +167,11 @@
     var speaking = false;
     var lastMessageId = '';
 
-    console.error = (err) => {
-        console.warn(err);
+    window.onerror = function (msg, url, line) {
+        console.error(msg);
         showError();
-    }
+        return true; // same as preventDefault
+    };
 
     document.addEventListener("DOMContentLoaded", function () {
         createBtn = document.getElementById("createBtn");
@@ -259,6 +265,7 @@
 
     var lastText;
     function TalkToBot(text) {
+        recognizing = false;
         lastText = text;
         console.log(`:::talk: "${text}"`);
         if (text) {
@@ -273,7 +280,9 @@
                     if (id === 'retry') {
                         console.log('handling "please repeat"');
                         if (!speaking) {
+                            MoveToHistory(lastText, false);
                             DoSpeak('Please repeat');
+                            //MoveToHistory('Please repeat', true);
                         }
                     }
                     else {
