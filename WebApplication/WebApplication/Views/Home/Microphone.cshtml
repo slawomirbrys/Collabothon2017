@@ -2,7 +2,7 @@
 @{ 
     Layout = "~/Views/Shared/_Layout2.cshtml";
 }
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
 
 <table style="width: 600px">
@@ -10,24 +10,28 @@
         <td>
             <h1 style="font-weight:500;">Account Manager</h1>
         </td>
-        <td>
+        <td style="font-size: 40pt; display: flex">
             <i class="fa fa-assistive-listening-systems" 
                id="icon1"
                aria-hidden="true" 
-               style="font-size: 50pt; color: limegreen; display: none"></i>
+               style="color: limegreen; display: none"></i>
             <i class="fa fa-cogs" 
                id="icon2"
                aria-hidden="true" 
-               style="font-size: 50pt; color: gray; display: none"></i>
+               style="color: gray; display: none"></i>
             <i class="fa fa-commenting" 
                id="icon3"
                aria-hidden="true" 
-               style="font-size: 50pt; color: orangered; display: none"></i>
+               style="color: orangered; display: none"></i>
+            <i class="fa fa-bomb"
+               id="icon4"
+               aria-hidden="true"
+               style="color: red; display: none"></i>
         </td>
     </tr>
     <tr>
         <td colspan="2">
-            <h2 style="font-weight:500; font-size: 40pt; background-color: #eeeeee" id="phraseDiv">&nbsp;</h2>
+            <h2 style="font-weight:500; font-size: 30pt; background-color: #eeeeee" id="phraseDiv">&nbsp;</h2>
         </td>
     </tr>
     <tr>
@@ -74,6 +78,8 @@
 
     // Start the recognition
     function RecognizerStart(SDK, recognizer) {
+        console.log('--> START RECOGNITION');
+        console.log('recognizer', recognizer);
         recognizer.Recognize((event) => {
             /*
              Alternative syntax for typescript devs.
@@ -106,7 +112,7 @@
                     break;
                 case "SpeechSimplePhraseEvent":
                     UpdateRecognizedPhrase(event.Result.DisplayText);
-                    console.log('Recognized text: ', event.Result.DisplayText);
+                    //console.log('Recognized text: ', event.Result.DisplayText);
                     //DoSpeak(event.Result.DisplayText);
                     TalkToBot(event.Result.DisplayText);
                     break;
@@ -125,7 +131,8 @@
                 // The request succeeded. Nothing to do here.
             },
             (error) => {
-                console.error(error);
+                console.error('Error on speach', error);
+                showError();
             });
     }
 
@@ -152,6 +159,13 @@
     var icon1 = $('#icon1');
     var icon2 = $('#icon2');
     var icon3 = $('#icon3');
+    var speaking = false;
+    var lastMessageId = '';
+
+    console.error = (err) => {
+        console.warn(err);
+        showError();
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         createBtn = document.getElementById("createBtn");
@@ -218,7 +232,7 @@
 
     function UpdateStatus(status) {
         //statusDiv.innerHTML = status;
-        //console.log(status);
+        console.log('Update status:', status);
     }
 
     function UpdateRecognizedHypothesis(text) {
@@ -243,8 +257,10 @@
         //stopBtn.disabled = true;
     }
 
+    var lastText;
     function TalkToBot(text) {
-        var localText = text;
+        lastText = text;
+        console.log(`:::talk: "${text}"`);
         if (text) {
             showIcon(2);
             botDirectLine.postActivity({
@@ -256,20 +272,36 @@
                     console.log("Posted activity, assigned ID ", id);
                     if (id === 'retry') {
                         console.log('handling "please repeat"');
-                        DoSpeak('Please repeat');
+                        if (!speaking) {
+                            DoSpeak('Please repeat');
+                        }
                     }
                     else {
                         botDirectLine.activity$
-                            .filter(activity => activity.type === 'message' && activity.from.id !== userId)
+                            .filter(activity => activity.type === 'message' && activity.from.id !== userId && !speaking)
                             .subscribe(
                             message => {
-                                MoveToHistory(localText, false);
-                                console.log("received message ", message.text);
-                                DoSpeak(message.text);
+                                if (!speaking && message.id !== lastMessageId) {
+                                    lastMessageId = message.id;
+                                    MoveToHistory(lastText, false);
+                                    console.log("received message ", message.text);
+                                    console.log(message);
+                                    DoSpeak(message.text);
+                                }
+                                else {
+                                    console.log('!!! OMMITED DOUBLED MESSAGE');
+                                }
+                            },
+                            erorr => {
+                                console.log('Error when receiving message from bot', error);
+                                showError();
                             });
                     }
                 },
-                error => console.log("Error posting activity", error));
+                error => {
+                    console.log("Error posting activity", error)
+                    showError();
+                });
         }
         else {
             showIcon(1);
@@ -278,7 +310,7 @@
     }
 
     function MoveToHistory(text, isBot) {
-        var h = '<h2 style="color: ';
+        var h = '<h3 style="color: ';
         if (isBot) {
             h += 'coral; text-align: right';
         }
@@ -287,12 +319,13 @@
         }
         h += ';">';
         h += text;
-        h += "</h2>";
+        h += "</h3>";
         $('#history').prepend(h);
         UpdateRecognizedPhrase();
     }
 
     function DoSpeak(text) {
+        console.log(`:::speak: "${text}"`);
         UpdateRecognizedPhrase();
         if (text) {
             showIcon(3);
@@ -300,6 +333,7 @@
             bingClientTTS.synthesize(text, BingTTS.SupportedLocales.enAU_Female, () => {
                 RecognizerStart(SDK, recognizer);
                 MoveToHistory(text, true);
+                speaking = false;
             });
         }
         else {
@@ -309,11 +343,16 @@
     }
 
     function showIcon(number) {
-        //console.log('showIcon', number);
+        console.log('showIcon', number);
         $('#icon1').hide();
         $('#icon2').hide();
         $('#icon3').hide();
+        //$('#icon4').hide();
         $(`#icon${number}`).show();
+    }
+
+    function showError() {
+        showIcon(4);
     }
 
 </script>

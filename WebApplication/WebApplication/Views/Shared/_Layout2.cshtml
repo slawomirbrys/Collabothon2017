@@ -6,6 +6,7 @@
     <title>@ViewBag.Title - My ASP.NET Application</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -19,6 +20,11 @@
                 @Html.ActionLink("mBot", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li style="color: white !important; font-size: 16pt">
+                        <a><i class="fa fa-windows" aria-hidden="true"></i> Powered by Microsoft Azure</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
