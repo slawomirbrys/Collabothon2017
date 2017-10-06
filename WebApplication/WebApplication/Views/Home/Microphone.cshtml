@@ -330,6 +330,12 @@
         h += text;
         h += "</h3>";
         $('#history').prepend(h);
+
+        if (text.indexOf('card expires') > 0) {
+            h = '<h3 style="display: flow-root"><img src="@Url.Content("~/Content/mastercard1.png")" style="width: 300px; float: right"/></h3>'
+            $('#history').prepend(h);
+        }
+
         UpdateRecognizedPhrase();
     }
 
